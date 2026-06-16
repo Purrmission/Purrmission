@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Purrmission</title>
-    <link rel="stylesheet" href="styles.css?v=19" />
+    <link rel="stylesheet" href="styles.css?v=20" />
   </head>
   <body>
     <main class="shell" aria-label="Purrmission purchase advisor">
@@ -58,12 +58,18 @@
 
         <form class="judge-form" id="judge-form">
           <label class="field">
-            <span>Thing you want</span>
+            <span class="field-label">
+              What you want to purrchase
+              <span class="help-dot" tabindex="0" data-tooltip="Name the item as specifically as you can. Brand and model help the cat judge better.">?</span>
+            </span>
             <input id="item" name="item" type="text" placeholder="e.g., noise-canceling headphones" />
           </label>
 
           <label class="field">
-            <span>Currency</span>
+            <span class="field-label">
+              Purrchase currency
+              <span class="help-dot" tabindex="0" data-tooltip="Choose the currency for the item price and budget.">?</span>
+            </span>
             <select id="currency" name="currency">
               <option value="USD" selected>USD $</option>
               <option value="EUR">EUR €</option>
@@ -76,7 +82,10 @@
           </label>
 
           <label class="field money-field">
-            <span>Price</span>
+            <span class="field-label">
+              Item price
+              <span class="help-dot" tabindex="0" data-tooltip="Enter the price you would actually pay before taxes, shipping, or fees if you know them.">?</span>
+            </span>
             <span class="input-prefix">
               <span class="currency-prefix" data-currency-prefix aria-hidden="true">$</span>
               <input id="price" name="price" type="number" min="0" step="1" inputmode="decimal" value="120" />
@@ -87,19 +96,28 @@
             <label class="check-field">
               <input id="deal-price" name="deal-price" type="checkbox" />
               <span>
-                <strong>Sale / deal price</strong>
+                <strong class="field-label">
+                  Sale / deal price
+                  <span class="help-dot" tabindex="0" data-tooltip="Check this if the price is discounted or you waited for a better deal.">?</span>
+                </strong>
               </span>
             </label>
             <label class="check-field">
               <input id="returnable" name="returnable" type="checkbox" />
               <span>
-                <strong>Returnable</strong>
+                <strong class="field-label">
+                  Returnable
+                  <span class="help-dot" tabindex="0" data-tooltip="Check this only if you know you can return it without major friction.">?</span>
+                </strong>
               </span>
             </label>
           </div>
 
           <label class="range-field">
-            <span>Impawlse level</span>
+            <span class="field-label">
+              Impawlse level
+              <span class="help-dot" tabindex="0" data-tooltip="How desperately do you want it right now? Higher means the cat gets more suspicious.">?</span>
+            </span>
             <strong id="impulse-label">Medium</strong>
             <input id="impulse" name="impulse" type="range" min="1" max="5" value="3" />
           </label>
@@ -111,7 +129,10 @@
 
             <div class="detail-content">
               <label class="field money-field">
-                <span>Budget</span>
+                <span class="field-label">
+                  Budget
+                  <span class="help-dot" tabindex="0" data-tooltip="Optional spending limit for this purchase or category. Leave blank if you do not want budget math.">?</span>
+                </span>
                 <span class="input-prefix">
                   <span class="currency-prefix" data-currency-prefix aria-hidden="true">$</span>
                   <input id="budget" name="budget" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional" />
@@ -120,11 +141,17 @@
 
               <div class="field-grid">
                 <label class="field">
-                  <span>Uses</span>
+                  <span class="field-label">
+                    Expected uses
+                    <span class="help-dot" tabindex="0" data-tooltip="How many times you realistically expect to use it in the selected period.">?</span>
+                  </span>
                   <input id="uses" name="uses" type="number" min="0" step="1" inputmode="numeric" value="8" />
                 </label>
                 <label class="field">
-                  <span>Every</span>
+                  <span class="field-label">
+                    Use frequency
+                    <span class="help-dot" tabindex="0" data-tooltip="The period for your expected uses: per day, month, or year.">?</span>
+                  </span>
                   <select id="use-frequency" name="use-frequency">
                     <option value="day">Day</option>
                     <option value="month" selected>Month</option>
@@ -135,11 +162,17 @@
 
               <div class="field-grid">
                 <label class="field">
-                  <span>Keep for</span>
+                  <span class="field-label">
+                    Keep for
+                    <span class="help-dot" tabindex="0" data-tooltip="How long you expect this item to stay useful to you.">?</span>
+                  </span>
                   <input id="keep-for" name="keep-for" type="number" min="1" step="1" inputmode="numeric" value="1" />
                 </label>
                 <label class="field">
-                  <span>Period</span>
+                  <span class="field-label">
+                    Keep period
+                    <span class="help-dot" tabindex="0" data-tooltip="Choose whether the keep-for number means months or years.">?</span>
+                  </span>
                   <select id="keep-period" name="keep-period">
                     <option value="month">Month</option>
                     <option value="year" selected>Year</option>
@@ -149,7 +182,10 @@
 
               <div class="field-grid">
                 <label class="field">
-                  <span>Already own something similar?</span>
+                  <span class="field-label">
+                    Already own something similar?
+                    <span class="help-dot" tabindex="0" data-tooltip="Tell the cat if this overlaps with something you already own.">?</span>
+                  </span>
                   <select id="duplicate" name="duplicate">
                     <option value="0">No</option>
                     <option value="1">Kind of</option>
@@ -230,22 +266,34 @@
             </p>
             <div class="negotiation-grid">
               <label>
-                <span>Wait before buying (days)</span>
+                <span class="field-label">
+                  Wait before buying (days)
+                  <span class="help-dot" tabindex="0" data-tooltip="How many days you promise to wait before buying.">?</span>
+                </span>
                 <input id="wait-days" type="number" min="0" max="30" step="1" value="3" />
               </label>
               <label class="money-field">
-                <span>Buy only under</span>
+                <span class="field-label">
+                  Buy only under
+                  <span class="help-dot" tabindex="0" data-tooltip="Your maximum acceptable price after negotiating with the cat.">?</span>
+                </span>
                 <span class="input-prefix">
                   <span class="currency-prefix" data-currency-prefix aria-hidden="true">$</span>
                   <input id="target-price" type="number" min="0" step="1" value="90" />
                 </span>
               </label>
               <label>
-                <span>Promised uses (times)</span>
+                <span class="field-label">
+                  Promised uses (times)
+                  <span class="help-dot" tabindex="0" data-tooltip="How many times you promise to use it if the cat makes an exception.">?</span>
+                </span>
                 <input id="promised-uses" type="number" min="0" step="1" value="12" />
               </label>
               <label>
-                <span>Every</span>
+                <span class="field-label">
+                  Every
+                  <span class="help-dot" tabindex="0" data-tooltip="The period for your promised uses.">?</span>
+                </span>
                 <select id="use-period">
                   <option value="day">Day</option>
                   <option value="month" selected>Month</option>
@@ -253,7 +301,10 @@
                 </select>
               </label>
               <label>
-                <span>Tradeoff</span>
+                <span class="field-label">
+                  Tradeoff
+                  <span class="help-dot" tabindex="0" data-tooltip="A concrete offset that makes the purchase less impulsive.">?</span>
+                </span>
                 <select id="tradeoff">
                   <option value="0">No tradeoff</option>
                   <option value="6">Use gift card / store credit</option>
@@ -327,6 +378,6 @@
       </div>
       <p>GOOD HUMAN</p>
     </div>
-    <script src="app.js?v=33"></script>
+    <script src="app.js?v=34"></script>
   </body>
 </html>
