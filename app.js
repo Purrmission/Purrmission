@@ -1497,6 +1497,60 @@ function updateImpulseLabel() {
   impulseLabel.textContent = impulseNames[impulse.value];
 }
 
+function closeHelpDots(exceptDot) {
+  document.querySelectorAll(".help-dot.is-open").forEach((dot) => {
+    if (dot !== exceptDot) {
+      dot.classList.remove("is-open");
+      dot.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
+function toggleHelpDot(dot) {
+  const willOpen = !dot.classList.contains("is-open");
+  closeHelpDots(dot);
+  dot.classList.toggle("is-open", willOpen);
+  dot.setAttribute("aria-expanded", String(willOpen));
+}
+
+document.querySelectorAll(".help-dot").forEach((dot) => {
+  dot.setAttribute("role", "button");
+  dot.setAttribute("aria-label", dot.dataset.tooltip || "Field help");
+  dot.setAttribute("aria-expanded", "false");
+
+  dot.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleHelpDot(dot);
+    dot.focus({ preventScroll: true });
+  });
+
+  dot.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+
+  dot.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleHelpDot(dot);
+    }
+
+    if (event.key === "Escape") {
+      dot.classList.remove("is-open");
+      dot.setAttribute("aria-expanded", "false");
+      dot.blur();
+    }
+  });
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (!event.target.closest(".help-dot")) {
+    closeHelpDots();
+  }
+});
+
 impulse.addEventListener("input", updateImpulseLabel);
 
 form.addEventListener("submit", (event) => {
