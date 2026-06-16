@@ -157,76 +157,171 @@ const moodLines = {
     "muted. the cat is judging silently",
     "silent mode. the cat has withdrawn its purr",
     "no purrs, only side-eye",
+    "the room is quiet, but the judgment continues",
+    "purr channel closed for now",
+    "the cat has switched to silent audit mode",
+    "sound off. opinions remain available",
+    "the cat is saving its purrs for later",
   ],
   purrOn: [
     "purr on. the cat is pleased again",
     "purrs restored. morale is improving",
     "the cat has resumed soft supervision",
     "audio tribute accepted",
+    "the purr engine is back online",
+    "tiny motor restored",
+    "the cat is once again vibrating with authority",
+    "sound on. the cat approves the ambience",
+    "purr privileges reinstated",
   ],
   unnamedSave: [
     "name the thing to save this judgment",
     "the cat needs a name for the evidence file",
     "unnamed temptations vanish from cat memory",
+    "the cat refuses to archive a mystery",
+    "give the temptation a label first",
+    "no name, no permanent paw print",
+    "the case file needs a title",
+    "the cat cannot remember a vague urge",
   ],
   unnamedFeedback: [
     "name the thing before teaching the cat",
     "the cat cannot learn from a mystery object",
     "label the temptation first, then the cat will study it",
+    "the lesson needs a subject",
+    "the cat needs receipts and nouns",
+    "feedback rejected until the object has a name",
+    "the cat is smart, not psychic",
+    "identify the suspect purchase first",
   ],
   approved: [
     "approved, with supervision",
     "the cat allows it, but keeps the receipt",
     "soft approval. no victory lap",
     "purrmission stamped, gently",
+    "the cat gives a careful nod",
+    "approved, but do not get dramatic",
+    "green light with whisker-level monitoring",
+    "the cat permits this one",
+    "a rare approving blink has occurred",
+    "purrmission granted, dignity intact",
   ],
   judged: [
     "judgment has been served",
     "the cat has rendered an opinion",
     "a verdict has landed on tiny paws",
     "the council of one has spoken",
+    "the cat has reviewed the temptation",
+    "decision delivered with measured whiskers",
+    "the purchase has been weighed",
+    "the cat has completed its inspection",
+    "verdict filed under tiny authority",
+    "the cat has thoughts, as usual",
   ],
   budgetBreach: [
     "budget breach detected",
     "the cat saw the budget line move",
     "financial paw alarm triggered",
     "that number made the cat sit upright",
+    "the budget has been scratched",
+    "the cat is now close to the camera",
+    "spending perimeter breached",
+    "the cat is tapping the spreadsheet",
+    "that price stepped over the line",
+    "paw siren activated",
   ],
   regret: [
     "the cat is taking notes",
     "regret has entered the case file",
     "the cat has opened a tiny audit",
+    "noted for future suspicion",
+    "the cat remembers this feeling",
+    "post-purchase evidence collected",
+    "the regret signal has been logged",
+    "the cat is updating its stare",
   ],
   memory: [
     "memory updated",
     "the cat sharpened its future judgment",
     "noted for next temptation",
+    "the cat added this to the pattern map",
+    "future purrmissions will be adjusted",
+    "lesson stored in the tiny archive",
+    "the cat has learned one more human behavior",
+    "pattern recognition upgraded",
   ],
   acceptedTerms: [
     "the cat accepts your terms",
     "counter-purrposal accepted",
     "the cat grants a conditional nod",
+    "terms accepted, with whisker clauses",
+    "the cat allows the revised plan",
+    "negotiation successful, barely",
+    "the cat has permitted a narrow path",
+    "conditional purrmission unlocked",
   ],
   rejectedTerms: [
     "counteroffer rejected",
     "the cat is unmoved",
     "terms declined with a slow blink",
+    "the cat requests a better bargain",
+    "negotiation failed the sniff test",
+    "the cat remains unconvinced",
+    "terms rejected by paw majority",
+    "not enough improvement for purrmission",
   ],
   rebel: [
     "the cat saw that",
     "caught in 4k by the cat",
     "the cat has entered witness mode",
+    "defiance detected",
+    "the cat is staring directly at the receipt",
+    "you have chosen the dramatic path",
+    "the cat has left the group chat",
+    "purchase rebellion logged",
+    "the cat is filing an incident report",
   ],
   memoryWiped: [
     "memory wiped, dignity restored",
     "the slate is clean, the cat is suspicious",
     "history cleared. the cat pretends not to remember",
+    "records gone, instincts remain",
+    "the cat has shredded the tiny file",
+    "fresh start granted with narrowed eyes",
+    "archive cleared, judgment retained",
+    "the cat forgot nothing emotionally",
   ],
 };
 
+const rebelReasons = [
+  "You purrchased it anyway. The cat is now emotionally unavailable.",
+  "You ignored the verdict. The cat has moved from advisor to witness.",
+  "The purchase happened. The cat is processing this betrayal in silence.",
+  "Checkout completed against advice. The cat is updating your risk profile.",
+  "You chose chaos. The cat chose documentation.",
+  "The cat advised restraint; you selected plot development.",
+  "You purrchased it anyway. A tiny incident report has been opened.",
+  "The cat saw the transaction and is reconsidering its consulting rates.",
+  "Purchase rebellion confirmed. Future judgments may arrive with extra squinting.",
+  "You went around the cat. The cat has not gone around the evidence.",
+];
+
+const lastLineByType = {};
+
 function catMood(type) {
   const lines = moodLines[type] || moodLines.judged;
-  return lines[Math.floor(Math.random() * lines.length)];
+  return randomLine(type, lines);
+}
+
+function randomLine(type, lines) {
+  if (lines.length <= 1) return lines[0] || "";
+
+  let next = lines[Math.floor(Math.random() * lines.length)];
+  while (next === lastLineByType[type]) {
+    next = lines[Math.floor(Math.random() * lines.length)];
+  }
+  lastLineByType[type] = next;
+  return next;
 }
 
 function selectedCurrency() {
@@ -805,7 +900,7 @@ negotiation.addEventListener("submit", calculateNegotiation);
 
 rebelButton.addEventListener("click", () => {
   mood.textContent = catMood("rebel");
-  reason.textContent = "You purrchased it anyway. The cat is now emotionally unavailable.";
+  reason.textContent = randomLine("rebelReason", rebelReasons);
   updateCurrentFeedback("bought");
   playPurr({ mood: "grumpy" });
   angryScratch();

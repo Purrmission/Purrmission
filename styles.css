@@ -898,15 +898,18 @@ input[type="range"] {
 
 .scratch-attack p {
   position: fixed;
+  left: 50%;
   bottom: 8vh;
+  width: min(92vw, 42rem);
   margin: 0;
   color: #fff;
   font-size: clamp(3rem, 18vw, 8rem);
   font-weight: 950;
   letter-spacing: 0;
+  text-align: center;
   text-shadow: 0 0.6rem 1.2rem rgba(0, 0, 0, 0.24);
   opacity: 0;
-  transform: translateY(1rem) rotate(-4deg);
+  transform: translateX(-50%) translateY(1rem) rotate(-4deg);
 }
 
 .feedback-panel,
@@ -1319,16 +1322,16 @@ input[type="range"] {
 @keyframes nope-pop {
   0% {
     opacity: 0;
-    transform: translateY(1rem) scale(0.86) rotate(-4deg);
+    transform: translateX(-50%) translateY(1rem) scale(0.86) rotate(-4deg);
   }
   35%,
   75% {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(-4deg);
+    transform: translateX(-50%) translateY(0) scale(1) rotate(-4deg);
   }
   100% {
     opacity: 0;
-    transform: translateY(-0.4rem) scale(1.04) rotate(-4deg);
+    transform: translateX(-50%) translateY(-0.4rem) scale(1.04) rotate(-4deg);
   }
 }
 
