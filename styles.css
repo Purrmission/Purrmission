@@ -416,6 +416,59 @@ input[type="range"] {
   overflow-wrap: anywhere;
 }
 
+.context-card {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.context-card[hidden] {
+  display: none;
+}
+
+.context-card > div:first-child {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.context-card span,
+.context-card dt {
+  color: rgba(255, 253, 250, 0.63);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.context-card strong {
+  color: #fff;
+  font-size: 1rem;
+}
+
+.context-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.context-card dd {
+  margin: 0.22rem 0 0;
+  color: #fff;
+  font-size: 0.94rem;
+  font-weight: 900;
+}
+
+.context-card p {
+  margin: 0;
+  color: rgba(255, 253, 250, 0.75);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
 .negotiation {
   display: grid;
   gap: 0.75rem;
@@ -889,6 +942,7 @@ input[type="range"] {
 
   .field-grid,
   .metrics,
+  .context-card dl,
   .negotiation-grid,
   .feedback-actions,
   .profile-card {

@@ -141,6 +141,23 @@
               <dd id="cat-score">62</dd>
             </div>
           </dl>
+          <div class="context-card" id="context-card" hidden>
+            <div>
+              <span>Cat context check</span>
+              <strong id="context-title">Category unknown</strong>
+            </div>
+            <dl>
+              <div>
+                <dt>Price context</dt>
+                <dd id="context-price">Not enough data</dd>
+              </div>
+              <div>
+                <dt>Risk</dt>
+                <dd id="context-risk">Normal</dd>
+              </div>
+            </dl>
+            <p id="context-checks"></p>
+          </div>
           <form class="negotiation" id="negotiation" hidden>
             <div class="negotiation-head">
               <strong>Negotiate with the cat</strong>
@@ -183,9 +200,9 @@
                 </select>
               </label>
             </div>
-            <button class="negotiate-button" type="submit">Submit counterpurrposal</button>
+            <button class="negotiate-button" type="submit">Submit Counter-Purrposal</button>
           </form>
-          <button class="rebel-button" id="rebel-button" type="button" hidden>I purrchased it anyway</button>
+          <button class="rebel-button" id="rebel-button" type="button" hidden>I Purrchased It Anyway</button>
         </section>
 
         <section class="feedback-panel" id="feedback-panel" aria-label="Purchase follow-up">
@@ -226,6 +243,6 @@
       <span class="scratch scratch-three"></span>
       <p>NOPE</p>
     </div>
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
   </body>
 </html>

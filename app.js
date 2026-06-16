@@ -8,6 +8,11 @@ const reason = document.querySelector("#reason");
 const budgetBite = document.querySelector("#budget-bite");
 const costUse = document.querySelector("#cost-use");
 const catScore = document.querySelector("#cat-score");
+const contextCard = document.querySelector("#context-card");
+const contextTitle = document.querySelector("#context-title");
+const contextPrice = document.querySelector("#context-price");
+const contextRisk = document.querySelector("#context-risk");
+const contextChecks = document.querySelector("#context-checks");
 const rebelButton = document.querySelector("#rebel-button");
 const scratchAttack = document.querySelector("#scratch-attack");
 const negotiation = document.querySelector("#negotiation");
@@ -66,48 +71,75 @@ const usdPerCurrency = {
 const priceBenchmarks = [
   {
     label: "a house",
+    category: "Real estate",
     keywords: ["house", "home", "condo", "apartment", "flat", "townhouse"],
+    riskLevel: "High",
     typicalUsd: 300000,
+    checks: ["ownership", "legal status", "taxes", "repairs", "fees"],
   },
   {
     label: "a car",
+    category: "Vehicle",
     keywords: ["car", "vehicle", "truck", "suv", "tesla", "honda", "toyota", "bmw"],
+    riskLevel: "High",
     typicalUsd: 25000,
+    checks: ["title", "accident history", "repairs", "insurance", "fees"],
   },
   {
     label: "a laptop",
+    category: "Electronics",
     keywords: ["laptop", "macbook", "computer", "pc"],
+    riskLevel: "Medium",
     typicalUsd: 1200,
+    checks: ["condition", "warranty", "return policy"],
   },
   {
     label: "a phone",
+    category: "Electronics",
     keywords: ["phone", "iphone", "android", "pixel", "samsung"],
+    riskLevel: "Medium",
     typicalUsd: 900,
+    checks: ["condition", "storage", "carrier lock", "return policy"],
   },
   {
     label: "headphones",
+    category: "Audio",
     keywords: ["headphone", "headphones", "airpods", "earbuds"],
+    riskLevel: "Low",
     typicalUsd: 180,
+    checks: ["return policy", "warranty"],
   },
   {
     label: "a handbag",
+    category: "Bag",
     keywords: ["bag", "handbag", "purse", "tote", "wallet"],
+    riskLevel: "Medium",
     typicalUsd: 350,
+    checks: ["authenticity", "condition", "return policy"],
   },
   {
     label: "shoes",
+    category: "Shoes",
     keywords: ["shoe", "shoes", "sneakers", "boots", "heels"],
+    riskLevel: "Low",
     typicalUsd: 130,
+    checks: ["fit", "return policy"],
   },
   {
     label: "furniture",
+    category: "Furniture",
     keywords: ["sofa", "couch", "desk", "chair", "table", "bed", "mattress"],
+    riskLevel: "Medium",
     typicalUsd: 600,
+    checks: ["measurements", "delivery", "condition"],
   },
   {
     label: "coffee",
+    category: "Drink",
     keywords: ["coffee", "latte", "matcha", "boba", "tea"],
+    riskLevel: "Low",
     typicalUsd: 6,
+    checks: ["frequency"],
   },
 ];
 
@@ -156,15 +188,28 @@ function productPriceContext(item, price, currency) {
 
   if (!benchmark || price <= 0) {
     return {
+      category: "",
+      priceLevel: "",
+      riskLevel: "",
+      checks: [],
+      needsInspection: false,
       scoreShift: 0,
       message: "",
     };
   }
 
   const ratio = priceInUsd(price, currency) / benchmark.typicalUsd;
+  const baseContext = {
+    category: benchmark.category,
+    riskLevel: benchmark.riskLevel,
+    checks: benchmark.checks,
+    needsInspection: benchmark.riskLevel === "High" && ratio <= 0.02,
+  };
 
   if (ratio <= 0.02) {
     return {
+      ...baseContext,
+      priceLevel: "Suspiciously low",
       scoreShift: 34,
       message: ` For ${benchmark.label}, ${money(price, currency)} is wildly below a normal price. The cat is impressed, but wants you to check condition, scams, and hidden costs.`,
     };
@@ -172,6 +217,8 @@ function productPriceContext(item, price, currency) {
 
   if (ratio <= 0.35) {
     return {
+      ...baseContext,
+      priceLevel: "Cheap",
       scoreShift: 18,
       message: ` For ${benchmark.label}, ${money(price, currency)} looks cheap enough that price is helping your case.`,
     };
@@ -179,6 +226,8 @@ function productPriceContext(item, price, currency) {
 
   if (ratio >= 2.5) {
     return {
+      ...baseContext,
+      priceLevel: "Very high",
       scoreShift: -18,
       message: ` For ${benchmark.label}, ${money(price, currency)} looks high, so the cat wants stronger proof before approving.`,
     };
@@ -186,15 +235,34 @@ function productPriceContext(item, price, currency) {
 
   if (ratio >= 1.4) {
     return {
+      ...baseContext,
+      priceLevel: "High",
       scoreShift: -8,
       message: ` For ${benchmark.label}, ${money(price, currency)} is on the expensive side.`,
     };
   }
 
   return {
+    ...baseContext,
+    priceLevel: "Typical",
     scoreShift: 0,
     message: "",
   };
+}
+
+function renderContextCard(priceContext) {
+  if (!priceContext.category) {
+    contextCard.hidden = true;
+    return;
+  }
+
+  contextCard.hidden = false;
+  contextTitle.textContent = priceContext.category;
+  contextPrice.textContent = priceContext.priceLevel;
+  contextRisk.textContent = priceContext.riskLevel;
+  contextChecks.textContent = priceContext.checks.length
+    ? `Check: ${priceContext.checks.join(", ")}.`
+    : "";
 }
 
 function ensureAudio() {
@@ -609,11 +677,15 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   budgetBite.textContent = hasBudget ? `${Math.round(budgetRatio * 100)}%` : "Not set";
   costUse.textContent = `${money(perUse, currency)} / use`;
   catScore.textContent = normalizedScore;
+  renderContextCard(priceContext);
 
   let result;
   let message;
 
-  if (normalizedScore >= 72) {
+  if (priceContext.needsInspection) {
+    result = "Needs serious inspection";
+    message = `${item} is not a normal checkout decision. The cat will not treat ${money(price, currency)} as a simple bargain until the big risks are verified.`;
+  } else if (normalizedScore >= 72) {
     result = "Purrmission granted";
     message = `${item} looks useful enough. The cat allows this purrchase, but still wants the receipt.`;
   } else if (normalizedScore >= 50) {
@@ -636,9 +708,9 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   verdict.textContent = result;
   reason.textContent = message;
   currentDecision.verdict = result;
-  mood.textContent = normalizedScore >= 72 ? "approved, with supervision" : "judgment has been served";
-  rebelButton.hidden = normalizedScore >= 72;
-  negotiation.hidden = normalizedScore >= 72;
+  mood.textContent = normalizedScore >= 72 && !priceContext.needsInspection ? "approved, with supervision" : "judgment has been served";
+  rebelButton.hidden = normalizedScore >= 72 && !priceContext.needsInspection;
+  negotiation.hidden = normalizedScore >= 72 && !priceContext.needsInspection;
   if (remember) rememberDecision();
   if (sound) {
     playPurr({ mood: normalizedScore >= 72 ? "soft" : "grumpy" });
