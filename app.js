@@ -34,6 +34,7 @@ const REAL_PURR_SRC = "assets/cat-purr.mp3";
 
 let purrAudio;
 let purrTimer;
+let audioContext;
 let isMuted = localStorage.getItem(SOUND_KEY) === "true";
 
 let currentDecision = {
@@ -683,6 +684,66 @@ function playPurr(options = {}) {
   playRecordedPurr(options);
 }
 
+function getAudioContext() {
+  const Context = window.AudioContext || window.webkitAudioContext;
+  if (!Context) return null;
+  if (!audioContext) audioContext = new Context();
+  return audioContext;
+}
+
+function playAngryCat() {
+  if (isMuted) return;
+
+  const context = getAudioContext();
+  if (!context) return;
+  if (context.state === "suspended") context.resume();
+
+  stopPurrAudio();
+
+  const now = context.currentTime;
+  const duration = 0.62 + Math.random() * 0.12;
+  const master = context.createGain();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.exponentialRampToValueAtTime(0.18, now + 0.035);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  master.connect(context.destination);
+
+  const meow = context.createOscillator();
+  const meowGain = context.createGain();
+  const startFreq = 520 + Math.random() * 90;
+  meow.type = "sawtooth";
+  meow.frequency.setValueAtTime(startFreq, now);
+  meow.frequency.exponentialRampToValueAtTime(170 + Math.random() * 45, now + duration);
+  meowGain.gain.setValueAtTime(0.0001, now);
+  meowGain.gain.exponentialRampToValueAtTime(0.22, now + 0.05);
+  meowGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  meow.connect(meowGain).connect(master);
+
+  const bufferSize = Math.max(1, Math.floor(context.sampleRate * duration));
+  const noiseBuffer = context.createBuffer(1, bufferSize, context.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let index = 0; index < bufferSize; index += 1) {
+    data[index] = (Math.random() * 2 - 1) * (1 - index / bufferSize);
+  }
+
+  const hiss = context.createBufferSource();
+  const hissFilter = context.createBiquadFilter();
+  const hissGain = context.createGain();
+  hiss.buffer = noiseBuffer;
+  hissFilter.type = "bandpass";
+  hissFilter.frequency.setValueAtTime(2800 + Math.random() * 900, now);
+  hissFilter.Q.setValueAtTime(1.8, now);
+  hissGain.gain.setValueAtTime(0.0001, now);
+  hissGain.gain.exponentialRampToValueAtTime(0.16, now + 0.025);
+  hissGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  hiss.connect(hissFilter).connect(hissGain).connect(master);
+
+  meow.start(now);
+  hiss.start(now + 0.04);
+  meow.stop(now + duration);
+  hiss.stop(now + duration);
+}
+
 function scheduleAmbientPurr() {
   window.clearTimeout(purrTimer);
   if (isMuted) return;
@@ -1116,10 +1177,10 @@ form.addEventListener("submit", (event) => {
 negotiation.addEventListener("submit", calculateNegotiation);
 
 rebelButton.addEventListener("click", () => {
+  updateCurrentFeedback("bought");
   mood.textContent = catMood("rebel");
   reason.textContent = randomLine("rebelReason", rebelReasons);
-  updateCurrentFeedback("bought");
-  playPurr({ mood: "grumpy" });
+  playAngryCat();
   angryScratch();
 });
 
