@@ -69,15 +69,18 @@ function ensureAudio() {
 
 function createPurrWavBuffer({ mood = "soft" } = {}) {
   const sampleRate = 16000;
-  const duration = 0.75 + Math.random() * 0.45;
+  const duration = 1.15 + Math.random() * 0.45;
   const sampleCount = Math.floor(sampleRate * duration);
   const bytesPerSample = 2;
   const dataSize = sampleCount * bytesPerSample;
   const buffer = new ArrayBuffer(44 + dataSize);
   const view = new DataView(buffer);
-  const base = mood === "grumpy" ? 128 + Math.random() * 26 : 148 + Math.random() * 34;
-  const wobble = 6 + Math.random() * 8;
-  const volume = mood === "grumpy" ? 0.28 : 0.24;
+  const chest = mood === "grumpy" ? 44 + Math.random() * 8 : 34 + Math.random() * 10;
+  const audible = mood === "grumpy" ? 132 + Math.random() * 22 : 118 + Math.random() * 26;
+  const pulseRate = 18 + Math.random() * 8;
+  const breathRate = 1.6 + Math.random() * 0.8;
+  const volume = mood === "grumpy" ? 0.32 : 0.28;
+  let noiseHold = 0;
 
   function writeString(offset, value) {
     for (let i = 0; i < value.length; i += 1) {
@@ -102,14 +105,18 @@ function createPurrWavBuffer({ mood = "soft" } = {}) {
   for (let index = 0; index < sampleCount; index += 1) {
     const time = index / sampleRate;
     const envelope = Math.sin(Math.PI * (index / sampleCount));
-    const pulse = 0.55 + 0.45 * Math.sin(2 * Math.PI * wobble * time);
+    const pulse = 0.42 + 0.58 * Math.max(0, Math.sin(2 * Math.PI * pulseRate * time));
+    const breath = 0.58 + 0.42 * Math.sin(2 * Math.PI * breathRate * time + 0.8);
+    if (index % 7 === 0) {
+      noiseHold = Math.random() * 2 - 1;
+    }
     const wave =
-      Math.sin(2 * Math.PI * base * time) * 0.42 +
-      Math.sin(2 * Math.PI * base * 1.5 * time) * 0.18 +
-      Math.sin(2 * Math.PI * base * 2.2 * time) * 0.2 +
-      Math.sin(2 * Math.PI * base * 3.1 * time) * 0.1 +
-      (Math.random() * 2 - 1) * 0.025;
-    const sample = Math.max(-1, Math.min(1, wave * pulse * envelope * volume));
+      Math.sin(2 * Math.PI * chest * time) * 0.62 +
+      Math.sin(2 * Math.PI * chest * 2.03 * time) * 0.2 +
+      Math.sin(2 * Math.PI * audible * time) * 0.16 +
+      Math.sin(2 * Math.PI * audible * 1.52 * time) * 0.07 +
+      noiseHold * 0.05;
+    const sample = Math.max(-1, Math.min(1, wave * pulse * breath * envelope * volume));
     view.setInt16(44 + index * 2, sample * 32767, true);
   }
 
