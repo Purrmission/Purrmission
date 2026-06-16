@@ -52,7 +52,7 @@
               <input id="price" name="price" type="number" min="0" step="1" inputmode="decimal" value="120" />
             </label>
             <label class="field">
-              <span>Budget (optional)</span>
+              <span>Budget</span>
               <input id="budget" name="budget" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional" />
             </label>
           </div>
@@ -74,9 +74,19 @@
 
           <div class="field-grid">
             <label class="field">
-              <span>For months</span>
-              <input id="use-months" name="use-months" type="number" min="1" step="1" inputmode="numeric" value="12" />
+              <span>Keep for</span>
+              <input id="keep-for" name="keep-for" type="number" min="1" step="1" inputmode="numeric" value="1" />
             </label>
+            <label class="field">
+              <span>Period</span>
+              <select id="keep-period" name="keep-period">
+                <option value="month">Month</option>
+                <option value="year" selected>Year</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="field-grid">
             <label class="field">
               <span>Already own something similar?</span>
               <select id="duplicate" name="duplicate">

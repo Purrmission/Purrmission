@@ -275,8 +275,14 @@ function usageLabel(uses, period) {
   return `${uses} time${uses === 1 ? "" : "s"} per ${period}`;
 }
 
-function totalExpectedUses(uses, period, months) {
-  return Math.max(0, usesPerMonth(uses, period) * Math.max(1, months));
+function monthsFromDuration(value, period) {
+  const amount = Math.max(1, value);
+  return period === "year" ? amount * 12 : amount;
+}
+
+function totalExpectedUses(uses, usePeriod, keepValue, keepPeriod) {
+  const months = monthsFromDuration(keepValue, keepPeriod);
+  return Math.max(0, usesPerMonth(uses, usePeriod) * months);
 }
 
 function loadHistory() {
@@ -424,14 +430,15 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   const budget = readNumber("budget");
   const uses = readNumber("uses");
   const useFrequency = document.querySelector("#use-frequency").value;
-  const useMonths = Math.max(1, readNumber("use-months"));
+  const keepFor = Math.max(1, readNumber("keep-for"));
+  const keepPeriod = document.querySelector("#keep-period").value;
   const duplicate = Number(document.querySelector("#duplicate").value);
   const impulseValue = Number(impulse.value);
 
   const hasBudget = budget > 0;
   const budgetRatio = hasBudget ? price / budget : 0;
   const monthlyUses = usesPerMonth(uses, useFrequency);
-  const expectedUses = totalExpectedUses(uses, useFrequency, useMonths);
+  const expectedUses = totalExpectedUses(uses, useFrequency, keepFor, keepPeriod);
   const useScore = Math.min(30, monthlyUses * 3);
   const budgetPenalty = hasBudget ? Math.min(42, budgetRatio * 48) : 0;
   const impulsePenalty = impulseValue * 7;
