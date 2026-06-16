@@ -306,25 +306,127 @@ const rebelReasons = [
   "You went around the cat. The cat has not gone around the evidence.",
 ];
 
+function decisionReason(type, context) {
+  const { item, price, currency } = context;
+  const sentenceItem = item === "this" ? "This" : item;
+  const lines = {
+    inspection: [
+      `${sentenceItem} is not a normal checkout decision. The cat will not treat ${money(price, currency)} as a simple bargain until the big risks are verified.`,
+      `${money(price, currency)} for ${item} is less like shopping and more like a case file. The cat wants proof before any celebration.`,
+      `${sentenceItem} at ${money(price, currency)} has triggered the cat's serious-inspection whiskers. Verify the boring details before trusting the bargain.`,
+      `This is not a casual purrchase. For ${item}, ${money(price, currency)} needs documents, condition checks, and several skeptical blinks.`,
+      `The cat refuses to confuse cheap with safe. ${item} needs a full inspection before ${money(price, currency)} gets treated as good news.`,
+      `${sentenceItem} may be a miracle or a trap. The cat requests ownership, fees, condition, and legal reality before approving the vibe.`,
+    ],
+    approved: [
+      `${sentenceItem} looks useful enough. The cat allows this purrchase, but still wants the receipt.`,
+      `${sentenceItem} has survived the paw audit. Approved, with light supervision and no smug checkout dance.`,
+      `The numbers make enough sense for ${item}. The cat permits it, while pretending this was difficult.`,
+      `${sentenceItem} earns a cautious yes. The cat is not thrilled by capitalism, but accepts this case.`,
+      `This looks reasonable enough to pass. The cat grants purrmission and expects future evidence of actual use.`,
+      `${sentenceItem} clears the tiny council. Buy it, keep the receipt, and do not make the cat regret being generous.`,
+      `The cat sees a real use case here. Purrmission granted, but with one eye open.`,
+      `${sentenceItem} appears defensible. The cat allows the purrchase under normal household law.`,
+    ],
+    wait: [
+      `${sentenceItem} may be fine, but the cat smells impulse. Revisit it after the mood changes.`,
+      `${sentenceItem} is not a hard no, but the cat recommends letting the dopamine cool down first.`,
+      `The case for ${item} is plausible, not urgent. The cat prescribes a pause and one dramatic window stare.`,
+      `${sentenceItem} is hovering in maybe territory. Wait, then see if it still looks like a need instead of a sparkle.`,
+      `The cat is not blocking ${item}, but it is placing one paw on the checkout button.`,
+      `${sentenceItem} could make sense later. For now, the cat wants time, distance, and fewer tabs open.`,
+      `This is a soft maybe. The cat recommends a cooldown before the wallet gets involved.`,
+      `${sentenceItem} has not earned instant purrmission. Let the desire sit in a sunbeam for a while.`,
+    ],
+    no: [
+      `${sentenceItem} is taking a big bite for the value. The cat recommends closing the tab.`,
+      `${sentenceItem} did not pass the sniff test. The cat advises retreating from the checkout area.`,
+      `The value story for ${item} is too thin. The cat is gently but firmly blocking the path.`,
+      `${sentenceItem} looks more like a want with a costume on. The cat says no for now.`,
+      `The math is not purring. ${item} should stay outside the cart.`,
+      `${sentenceItem} has failed the tiny audit. The cat recommends keeping the money and the dignity.`,
+      `The cat sees risk, impulse, or weak use. ${item} does not get purrmission today.`,
+      `This purchase is asking for trust it has not earned. The cat closes the imaginary laptop.`,
+    ],
+  };
+
+  return randomLine(`decision-${type}`, lines[type]);
+}
+
+function negotiationReason(type, context) {
+  const { item, waitDays, targetPrice, currency, promisedUsage } = context;
+  const sentenceItem = item === "this" ? "This" : item;
+  const dayLabel = `${waitDays} day${waitDays === 1 ? "" : "s"}`;
+  const lines = {
+    accepted: [
+      `${sentenceItem} is allowed if you wait ${dayLabel}, pay no more than ${money(targetPrice, currency)}, and use it ${promisedUsage}. The cat has made a legally fuzzy exception.`,
+      `Conditional purrmission: wait ${dayLabel}, cap the price at ${money(targetPrice, currency)}, and actually use it ${promisedUsage}. The cat will be checking the vibes.`,
+      `The revised terms pass. ${sentenceItem} may proceed only under ${money(targetPrice, currency)}, after ${dayLabel}, with ${promisedUsage} as the usage promise.`,
+      `The cat accepts this narrower path: wait ${dayLabel}, keep the price under ${money(targetPrice, currency)}, and make the promised use real.`,
+      `Counter-purrposal accepted. ${sentenceItem} gets a conditional yes, but only with the wait, the price cap, and the usage promise attached.`,
+      `The cat has softened. ${sentenceItem} is allowed if future-you honors the ${dayLabel} wait and ${money(targetPrice, currency)} ceiling.`,
+    ],
+    rejected: [
+      `The counteroffer improved things, but not enough. The cat wants a lower price, more real use, or a cleaner tradeoff.`,
+      `The revised plan still smells like checkout energy. The cat wants stronger terms before changing the verdict.`,
+      `Not enough movement. Lower the price, wait longer, promise more believable use, or trade off something real.`,
+      `The cat reviewed the counter-purrposal and kept one paw firmly on the no button.`,
+      `This negotiation is closer, but not purring. Bring a better price or a better sacrifice.`,
+      `The cat appreciates the attempt, but the offer still does not clear the tiny tribunal.`,
+      `Terms declined. The cat needs less impulse and more evidence.`,
+      `The counteroffer has entered the record and failed to impress the record keeper.`,
+    ],
+  };
+
+  return randomLine(`negotiation-${type}`, lines[type]);
+}
+
 const usageRealityChecks = {
   day: [
     "Also, more than 24 uses per day is ambitious. The cat would like to inspect your calendar.",
     "The cat noticed that a day only has 24 hours. This usage plan is wearing a tiny fake mustache.",
     "More than 24 times per day? The cat is not judging the score, just the physics.",
+    "The cat is trying to fit these uses into one day and has run out of squares on the planner.",
+    "That daily count suggests either a heroic routine or a suspicious spreadsheet.",
+    "The score stays the same, but the cat has questions about sleep.",
+    "This is more than once per hour. The cat is quietly checking whether time still works.",
+    "The calendar did not consent to this daily usage plan.",
+    "The cat will accept the number, but only with a very theatrical blink.",
+    "That is a busy day. The cat hopes snacks are involved.",
+    "Daily use this high has entered tiny logistics territory.",
+    "The cat is not changing the verdict, but it has opened the schedule drawer.",
   ],
   month: [
     "Also, more uses than days in a month is possible, but the cat is raising one eyebrow.",
     "The cat counted the days in a month and found fewer than your usage estimate.",
     "This monthly use count is higher than the calendar. The cat will allow the math but not the drama.",
+    "The month is looking at this usage number and quietly backing away.",
+    "The cat accepts repeat use, but this estimate is doing cartwheels across the calendar.",
+    "More uses than days is possible. The cat simply requests emotional honesty from the spreadsheet.",
+    "The score is unchanged, but the cat has placed a paw on the calendar.",
+    "This monthly plan has strong main-character energy.",
+    "The cat believes in ambition, not necessarily this much ambition.",
+    "The usage math says yes; the calendar says please explain.",
+    "The cat is letting the verdict stand while side-eyeing the frequency.",
+    "That is a lot of monthly contact with one object. The cat is intrigued and concerned.",
   ],
   year: [
     "Also, more uses than days in a year is possible, but the cat is requesting a lifestyle diagram.",
     "The cat checked the calendar. This yearly use count is doing a lot.",
     "More than 366 times per year? The cat is not changing the verdict, only staring at the schedule.",
+    "The year has only so many days, and the cat has only so many approving blinks.",
+    "This annual usage estimate has sprinted past the calendar and into mythology.",
+    "The score remains untouched, but the cat is drawing a tiny timeline.",
+    "The cat accepts that multiple uses can happen in one day. It still wants to see the receipts.",
+    "This yearly plan sounds intense enough to need onboarding.",
+    "The calendar has been consulted and is asking for clarification.",
+    "The cat is not disputing your lifestyle. It is simply blinking slowly at the math.",
+    "That yearly number implies commitment. The cat hopes the object is ready.",
+    "The verdict stays, but the cat is writing 'ambitious' in the margin.",
   ],
 };
 
-const lastLineByType = {};
+const recentLinesByType = {};
 
 function catMood(type) {
   const lines = moodLines[type] || moodLines.judged;
@@ -334,11 +436,12 @@ function catMood(type) {
 function randomLine(type, lines) {
   if (lines.length <= 1) return lines[0] || "";
 
+  const recentLines = recentLinesByType[type] || [];
+  const eligibleLines = lines.filter((line) => !recentLines.includes(line));
+  const pool = eligibleLines.length ? eligibleLines : lines;
   let next = lines[Math.floor(Math.random() * lines.length)];
-  while (next === lastLineByType[type]) {
-    next = lines[Math.floor(Math.random() * lines.length)];
-  }
-  lastLineByType[type] = next;
+  next = pool[Math.floor(Math.random() * pool.length)];
+  recentLinesByType[type] = [next, ...recentLines].slice(0, Math.min(4, lines.length - 1));
   return next;
 }
 
@@ -817,16 +920,16 @@ function calculateDecision({ remember = true, sound = true } = {}) {
 
   if (priceContext.needsInspection) {
     result = "Needs serious inspection";
-    message = `${item} is not a normal checkout decision. The cat will not treat ${money(price, currency)} as a simple bargain until the big risks are verified.`;
+    message = decisionReason("inspection", { item, price, currency });
   } else if (normalizedScore >= 72) {
     result = "Purrmission granted";
-    message = `${item} looks useful enough. The cat allows this purrchase, but still wants the receipt.`;
+    message = decisionReason("approved", { item, price, currency });
   } else if (normalizedScore >= 50) {
     result = "Purrhaps wait";
-    message = `${item} may be fine, but the cat smells impulse. Revisit it after the mood changes.`;
+    message = decisionReason("wait", { item, price, currency });
   } else {
     result = "No purrmission";
-    message = `${item} is taking a big bite for the value. The cat recommends closing the tab.`;
+    message = decisionReason("no", { item, price, currency });
     calculator.classList.add("skeptical");
   }
 
@@ -891,7 +994,13 @@ function calculateNegotiation(event) {
 
   if (adjustedScore >= 72 && (!hasBudget || adjustedBudgetRatio <= 1)) {
     verdict.textContent = "Conditional purrmission";
-    reason.textContent = `${currentDecision.item} is allowed if you wait ${waitDays} day${waitDays === 1 ? "" : "s"}, pay no more than ${money(targetPrice, currentDecision.currency)}, and use it ${promisedUsage}. The cat has made a legally fuzzy exception.`;
+    reason.textContent = negotiationReason("accepted", {
+      item: currentDecision.item,
+      waitDays,
+      targetPrice,
+      currency: currentDecision.currency,
+      promisedUsage,
+    });
     currentDecision.verdict = "Conditional purrmission";
     currentDecision.score = adjustedScore;
     mood.textContent = catMood("acceptedTerms");
@@ -905,7 +1014,13 @@ function calculateNegotiation(event) {
   }
 
   verdict.textContent = "Still no purrmission";
-  reason.textContent = `The counteroffer improved things, but not enough. The cat wants a lower price, more real use, or a cleaner tradeoff.`;
+  reason.textContent = negotiationReason("rejected", {
+    item: currentDecision.item,
+    waitDays,
+    targetPrice,
+    currency: currentDecision.currency,
+    promisedUsage,
+  });
   mood.textContent = catMood("rejectedTerms");
   currentDecision.verdict = "Still no purrmission";
   currentDecision.score = adjustedScore;
