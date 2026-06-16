@@ -452,6 +452,12 @@ body {
   gap: 0.8rem;
 }
 
+.quick-checks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
 .field,
 .range-field,
 .check-field {
@@ -1739,6 +1745,7 @@ input[type="range"] {
   }
 
   .field-grid,
+  .quick-checks,
   .metrics,
   .context-card dl,
   .negotiation-grid,

@@ -442,6 +442,30 @@ function dealNote(priceContext) {
   return randomLine("deal-note", lines);
 }
 
+function returnableScoreShift(isReturnable, impulseValue, priceContext) {
+  if (priceContext.needsInspection) return isReturnable ? 2 : -4;
+  if (isReturnable) return 5;
+  return impulseValue >= 4 ? -5 : -3;
+}
+
+function returnableNote(isReturnable) {
+  const lines = isReturnable
+    ? [
+        "Returnable helps. The cat likes an exit door.",
+        "A return option makes this less reckless. The cat has lowered one eyebrow.",
+        "Returnable is useful evidence. The cat appreciates homework with a safety net.",
+        "The return policy helps your case, assuming future-you actually uses it if needed.",
+      ]
+    : [
+        "No return safety net is marked, so the cat treats the impulse as louder.",
+        "Without returnable evidence, the cat assumes checkout has fewer escape routes.",
+        "The cat does not see a return option, which makes the decision feel stickier.",
+        "No return checkbox, no safety blanket. The cat is adding a little caution.",
+      ];
+
+  return randomLine(`returnable-${isReturnable ? "yes" : "no"}`, lines);
+}
+
 const usageRealityChecks = {
   day: [
     "Also, more than 24 uses per day is ambitious. The cat would like to inspect your calendar.",
@@ -1068,6 +1092,7 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   const impulseValue = Number(impulse.value);
   const currency = selectedCurrency();
   const isDealPrice = document.querySelector("#deal-price").checked;
+  const isReturnable = document.querySelector("#returnable").checked;
 
   const hasBudget = budget > 0;
   const budgetRatio = hasBudget ? price / budget : 0;
@@ -1080,8 +1105,16 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   const priceContext = productPriceContext(item, price, currency);
   const usageNote = usageRealityNote(uses, useFrequency);
   const dealBonus = dealScoreBonus(isDealPrice, priceContext);
+  const returnableShift = returnableScoreShift(isReturnable, impulseValue, priceContext);
   const score = Math.round(
-    68 + useScore + priceContext.scoreShift + dealBonus - budgetPenalty - impulsePenalty - duplicatePenalty,
+    68 +
+      useScore +
+      priceContext.scoreShift +
+      dealBonus +
+      returnableShift -
+      budgetPenalty -
+      impulsePenalty -
+      duplicatePenalty,
   );
   const normalizedScore = Math.max(0, Math.min(100, score));
   const perUse = expectedUses > 0 ? price / expectedUses : price;
@@ -1096,6 +1129,7 @@ function calculateDecision({ remember = true, sound = true } = {}) {
     verdict: "",
     currency,
     isDealPrice,
+    isReturnable,
     feedback: [],
     id: null,
     hasNamedItem: Boolean(itemName),
@@ -1135,6 +1169,8 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   if (isDealPrice) {
     message += ` ${dealNote(priceContext)}`;
   }
+
+  message += ` ${returnableNote(isReturnable)}`;
 
   if (usageNote) {
     message += ` ${usageNote}`;
