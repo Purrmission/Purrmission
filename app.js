@@ -32,6 +32,7 @@ const CURRENCY_KEY = "purrmission-currency";
 const REAL_PURR_SRC = "assets/cat-purr.mp3";
 
 let audioContext;
+let purrAudio;
 let purrTimer;
 let isMuted = localStorage.getItem(SOUND_KEY) === "true";
 
@@ -428,21 +429,59 @@ function playGeneratedPurr(options) {
   }
 }
 
+function getPurrAudio() {
+  if (typeof Audio === "undefined") return null;
+
+  if (!purrAudio) {
+    purrAudio = new Audio(REAL_PURR_SRC);
+    purrAudio.preload = "auto";
+    purrAudio.load();
+  }
+
+  return purrAudio;
+}
+
 function playRecordedPurr({ mood = "soft" } = {}) {
-  if (isMuted || typeof document === "undefined") return false;
+  if (isMuted) return false;
 
   try {
-    const audio = document.createElement("audio");
-    audio.src = REAL_PURR_SRC;
+    const audio = getPurrAudio();
+    if (!audio) return false;
     audio.volume = mood === "grumpy" ? 0.5 + Math.random() * 0.12 : 0.38 + Math.random() * 0.12;
     audio.playbackRate = 0.92 + Math.random() * 0.16;
-    audio.play().catch(() => {
-      playGeneratedPurr({ mood });
-    });
+    audio.currentTime = 0;
+    const playAttempt = audio.play();
+    if (playAttempt?.catch) {
+      playAttempt.catch(() => {
+        purrAudio = null;
+        playGeneratedPurr({ mood });
+      });
+    }
     return true;
   } catch {
+    purrAudio = null;
     return false;
   }
+}
+
+function primePurrAudio() {
+  try {
+    getPurrAudio();
+  } catch {
+    purrAudio = null;
+  }
+}
+
+function playImmediatePurr(options = {}) {
+  ensureAudio();
+  primePurrAudio();
+  const played = playRecordedPurr(options);
+  window.setTimeout(() => {
+    if (!played && !isMuted) {
+      playGeneratedPurr(options);
+    }
+  }, 120);
+  return played;
 }
 
 function playSynthPurr({ mood = "soft" } = {}) {
@@ -486,6 +525,10 @@ function playSynthPurr({ mood = "soft" } = {}) {
 
 function playPurr(options = {}) {
   if (isMuted) return;
+  if (options.immediate) {
+    playImmediatePurr(options);
+    return;
+  }
   const played = playRecordedPurr(options);
   if (played) return;
   const generated = playGeneratedPurr(options);
@@ -538,7 +581,7 @@ function setMuted(nextMuted, { silent = false } = {}) {
       calculator.classList.remove("purr-return");
       soundToggle.classList.remove("is-purr-happy");
     }, 950);
-    playPurr();
+    playPurr({ immediate: true });
     scheduleAmbientPurr();
   }
 }
@@ -921,6 +964,7 @@ if (savedCurrency && Array.from(currencySelect.options).some((option) => option.
 
 updateImpulseLabel();
 updateCurrencyUI();
+primePurrAudio();
 calculateDecision({ remember: false, sound: false });
 setMuted(isMuted, { silent: true });
 renderProfile();
