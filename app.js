@@ -157,6 +157,138 @@ const priceBenchmarks = [
   },
 ];
 
+const categoryRules = [
+  {
+    category: "real_estate",
+    label: "Real estate",
+    keywords: ["house", "home", "condo", "apartment", "flat", "townhouse"],
+    segment: "major_asset",
+    typicalUsd: 300000,
+    risk: "high",
+    checks: ["ownership", "legal status", "taxes", "repairs", "fees"],
+  },
+  {
+    category: "vehicle",
+    label: "Vehicle",
+    keywords: ["car", "vehicle", "truck", "suv", "tesla"],
+    segment: "major_asset",
+    typicalUsd: 25000,
+    risk: "high",
+    checks: ["title", "accident history", "repairs", "insurance", "fees"],
+  },
+  {
+    category: "luxury_bag",
+    label: "Luxury bag",
+    keywords: ["birkin", "kelly", "herbag", "classic flap", "lady dior", "neverfull"],
+    segment: "luxury_resale",
+    typicalUsd: 2500,
+    risk: "high",
+    checks: ["authentication", "condition", "seller reputation", "return policy"],
+  },
+  {
+    category: "electronics",
+    label: "Electronics",
+    keywords: ["iphone", "phone", "macbook", "laptop", "ipad", "computer", "camera", "headphones", "airpods"],
+    segment: "consumer_electronics",
+    typicalUsd: 900,
+    risk: "medium",
+    checks: ["model year", "warranty", "condition", "return policy"],
+  },
+  {
+    category: "home_appliance",
+    label: "Home appliance",
+    keywords: ["dyson", "airwrap", "vacuum", "espresso machine", "mixer", "air purifier"],
+    segment: "durable_goods",
+    typicalUsd: 450,
+    risk: "medium",
+    checks: ["warranty", "condition", "return policy"],
+  },
+  {
+    category: "bag",
+    label: "Bag",
+    keywords: ["bag", "handbag", "purse", "tote", "wallet"],
+    segment: "fashion",
+    typicalUsd: 180,
+    risk: "medium",
+    checks: ["condition", "material", "return policy"],
+  },
+  {
+    category: "clothing",
+    label: "Clothing",
+    keywords: ["coat", "jacket", "dress", "jeans", "sweater", "shirt", "skirt"],
+    segment: "fashion",
+    typicalUsd: 140,
+    risk: "low",
+    checks: ["fit", "return policy", "care"],
+  },
+  {
+    category: "shoes",
+    label: "Shoes",
+    keywords: ["shoe", "shoes", "sneakers", "boots", "heels", "loafers"],
+    segment: "fashion",
+    typicalUsd: 130,
+    risk: "low",
+    checks: ["fit", "return policy", "comfort"],
+  },
+  {
+    category: "beauty",
+    label: "Beauty",
+    keywords: ["perfume", "fragrance", "makeup", "skincare", "lipstick", "serum"],
+    segment: "beauty",
+    typicalUsd: 80,
+    risk: "low",
+    checks: ["shade", "skin sensitivity", "return policy"],
+  },
+  {
+    category: "furniture",
+    label: "Furniture",
+    keywords: ["sofa", "couch", "desk", "chair", "table", "bed", "mattress"],
+    segment: "home",
+    typicalUsd: 600,
+    risk: "medium",
+    checks: ["measurements", "delivery", "condition"],
+  },
+  {
+    category: "food_drink",
+    label: "Food / drink",
+    keywords: ["coffee", "latte", "matcha", "boba", "tea", "dinner", "brunch"],
+    segment: "consumable",
+    typicalUsd: 15,
+    risk: "low",
+    checks: ["frequency"],
+  },
+];
+
+const brandRules = [
+  { brand: "Hermes", aliases: ["hermes", "hermès"], sensitivity: "high", categories: ["luxury_bag"] },
+  { brand: "Chanel", aliases: ["chanel"], sensitivity: "high", categories: ["luxury_bag", "clothing"] },
+  { brand: "Louis Vuitton", aliases: ["louis vuitton", "lv"], sensitivity: "high", categories: ["luxury_bag"] },
+  { brand: "Dior", aliases: ["dior"], sensitivity: "high", categories: ["luxury_bag", "beauty"] },
+  { brand: "Gucci", aliases: ["gucci"], sensitivity: "high", categories: ["luxury_bag", "shoes", "clothing"] },
+  { brand: "Prada", aliases: ["prada"], sensitivity: "high", categories: ["luxury_bag", "shoes", "clothing"] },
+  { brand: "Rolex", aliases: ["rolex"], sensitivity: "high", categories: ["watch"] },
+  { brand: "Apple", aliases: ["apple", "iphone", "macbook", "ipad", "airpods"], sensitivity: "medium", categories: ["electronics"] },
+  { brand: "Dyson", aliases: ["dyson"], sensitivity: "medium", categories: ["home_appliance"] },
+  { brand: "Tesla", aliases: ["tesla"], sensitivity: "high", categories: ["vehicle"] },
+  { brand: "Nike", aliases: ["nike"], sensitivity: "medium", categories: ["shoes", "clothing"] },
+  { brand: "Sony", aliases: ["sony"], sensitivity: "medium", categories: ["electronics"] },
+];
+
+const modelRules = [
+  { model: "Herbag", keywords: ["herbag"] },
+  { model: "Birkin", keywords: ["birkin"] },
+  { model: "Kelly", keywords: ["kelly"] },
+  { model: "Classic Flap", keywords: ["classic flap"] },
+  { model: "Lady Dior", keywords: ["lady dior"] },
+  { model: "Neverfull", keywords: ["neverfull"] },
+  { model: "iPhone", keywords: ["iphone"] },
+  { model: "MacBook", keywords: ["macbook"] },
+  { model: "AirPods", keywords: ["airpods"] },
+  { model: "Airwrap", keywords: ["airwrap"] },
+  { model: "Model 3", keywords: ["model 3"] },
+  { model: "Model Y", keywords: ["model y"] },
+];
+
 const impulseNames = {
   1: "Calm",
   2: "Curious",
@@ -475,6 +607,17 @@ function returnableNote(isReturnable) {
   return randomLine(`returnable-${isReturnable ? "yes" : "no"}`, lines);
 }
 
+function intelligenceNote(analysis) {
+  if (!analysis) return "";
+  if (analysis.decision_influence.should_force_inspection) {
+    return ` ${analysis.market_context.summary}`;
+  }
+  if (analysis.decision_influence.should_ask_followup) {
+    return ` ${analysis.market_context.summary} ${analysis.decision_influence.followup_question}`;
+  }
+  return ` ${analysis.market_context.summary}`;
+}
+
 const usageRealityChecks = {
   day: [
     "Also, more than 24 uses per day is ambitious. The cat would like to inspect your calendar.",
@@ -580,10 +723,22 @@ function updateCurrencyUI() {
 function productPriceContext(item, price, currency) {
   const normalizedItem = item.toLowerCase();
   const benchmark = priceBenchmarks.find((entry) =>
-    entry.keywords.some((keyword) => normalizedItem.includes(keyword)),
+    entry.keywords.some((keyword) => keywordMatches(normalizedItem, keyword)),
   );
 
   if (!benchmark || price <= 0) {
+    return {
+      category: "",
+      priceLevel: "",
+      riskLevel: "",
+      checks: [],
+      needsInspection: false,
+      scoreShift: 0,
+      message: "",
+    };
+  }
+
+  if (benchmark.category === "Bag" && detectBrand(normalizedItem)?.sensitivity === "high") {
     return {
       category: "",
       priceLevel: "",
@@ -676,87 +831,166 @@ function priceBand(price) {
   return "5000-plus";
 }
 
-function inferMockAiContext(item, price, currency) {
+function keywordMatches(text, keyword) {
+  const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${escapedKeyword}([^a-z0-9]|$)`, "i").test(text);
+}
+
+function includesAny(text, keywords) {
+  return keywords.some((keyword) => keywordMatches(text, keyword));
+}
+
+function detectBrand(normalizedItem) {
+  return brandRules.find((entry) => includesAny(normalizedItem, entry.aliases)) || null;
+}
+
+function detectModel(normalizedItem) {
+  return modelRules.find((entry) => includesAny(normalizedItem, entry.keywords)) || null;
+}
+
+function detectCondition(normalizedItem) {
+  if (/\b(used|pre[- ]owned|secondhand|vintage|excellent condition|fair condition|good condition)\b/.test(normalizedItem)) {
+    return "used";
+  }
+  if (/\b(new|brand new|unused|nwt|with tags)\b/.test(normalizedItem)) {
+    return "new";
+  }
+  return "unknown";
+}
+
+function detectCategory(normalizedItem, brandMatch) {
+  const categoryMatch = categoryRules.find((entry) => includesAny(normalizedItem, entry.keywords));
+  const brandCategory = brandMatch?.categories?.[0];
+  const brandCategoryMatch = categoryRules.find((entry) => entry.category === brandCategory) || null;
+  if (brandMatch?.sensitivity === "high" && brandCategoryMatch) return brandCategoryMatch;
+  return categoryMatch || brandCategoryMatch;
+}
+
+function productSpecificity({ category, brand, model, condition, rawItem }) {
+  if (!rawItem) return "empty";
+  if (brand && model && condition !== "unknown" && /\b(excellent|good|fair|new|used|vintage|with tags|nwt)\b/.test(rawItem.toLowerCase())) {
+    return "exact_product";
+  }
+  if (brand && model && condition !== "unknown") return "brand_model_condition";
+  if (brand && model) return "brand_model";
+  if (brand && category) return "brand_category";
+  if (brand) return "brand_only";
+  if (category) return "generic_category";
+  return "unclear";
+}
+
+function marketReferenceFrame(categoryRule, brandMatch, modelMatch) {
+  if (!categoryRule) return "cannot_assess";
+  if (categoryRule.segment === "major_asset") return "asset_market";
+  if (brandMatch?.sensitivity === "high" && modelMatch) return "model_resale_market";
+  if (brandMatch?.sensitivity === "high") return "brand_category";
+  if (brandMatch) return "brand_market";
+  return "general_category";
+}
+
+function pricePosition(price, currency, categoryRule, brandMatch, modelMatch) {
+  if (!price || !categoryRule) return "unknown";
+  const ratio = priceInUsd(price, currency) / categoryRule.typicalUsd;
+
+  if (categoryRule.category === "luxury_bag" && brandMatch?.brand === "Hermes" && modelMatch?.model === "Herbag") {
+    if (ratio < 0.75) return "possibly_low";
+    if (ratio <= 1.55) return "plausible";
+    return "possibly_high";
+  }
+
+  if (ratio <= 0.08 && categoryRule.segment === "major_asset") return "suspiciously_low";
+  if (ratio <= 0.45) return "low";
+  if (ratio >= 2.5) return "very_high";
+  if (ratio >= 1.45) return "high";
+  return "typical";
+}
+
+function missingFactors({ categoryRule, brandMatch, modelMatch, condition, isReturnable }) {
+  const missing = [];
+  if (!categoryRule) missing.push("clear category");
+  if (brandMatch?.sensitivity === "high" && !modelMatch) missing.push("exact model");
+  if (brandMatch?.sensitivity === "high" && condition === "unknown") missing.push("condition");
+  if (brandMatch?.sensitivity === "high") missing.push("authentication");
+  if (!isReturnable) missing.push("return policy");
+  if (categoryRule?.segment === "major_asset") missing.push("ownership and fees");
+  return [...new Set(missing)].slice(0, 6);
+}
+
+function analysisSummary({ rawItem, price, currency, categoryRule, brandMatch, modelMatch, condition, position }) {
+  const priceText = money(price, currency);
+  if (!rawItem) return "Name the item first so the cat can classify it.";
+  if (!categoryRule) return "The cat cannot classify this yet. A clearer product name will make the judgment sharper.";
+  if (categoryRule.segment === "major_asset") {
+    return `${priceText} for ${categoryRule.label.toLowerCase()} needs serious verification. The cat treats it as documents-first, not bargain-first.`;
+  }
+  if (brandMatch?.sensitivity === "high" && !modelMatch) {
+    return `${brandMatch.brand} is brand-sensitive. The cat needs the exact model and condition before judging whether ${priceText} is actually good.`;
+  }
+  if (brandMatch?.sensitivity === "high" && modelMatch) {
+    return `${brandMatch.brand} ${modelMatch.model} has resale-market complexity. ${condition === "unknown" ? "Condition is still missing." : "Condition is part of the value case."}`;
+  }
+  if (position === "high" || position === "very_high") {
+    return `${priceText} looks elevated for ${categoryRule.label.toLowerCase()}, so the cat wants stronger justification.`;
+  }
+  if (position === "low" || position === "plausible") {
+    return `${priceText} may help the value case, but the cat still checks use, impulse, duplicates, and returnability.`;
+  }
+  return `The cat can compare this as ${categoryRule.label.toLowerCase()}, but brand, model, and condition would improve the read.`;
+}
+
+function decisionInfluence({ categoryRule, brandMatch, modelMatch, condition, position, missing }) {
+  let scoreShift = 0;
+  let shouldForceInspection = false;
+
+  if (position === "low" || position === "plausible") scoreShift += 2;
+  if (position === "high" || position === "possibly_high") scoreShift -= 3;
+  if (position === "very_high") scoreShift -= 6;
+  if (position === "suspiciously_low") {
+    scoreShift += 4;
+    shouldForceInspection = true;
+  }
+  if (brandMatch?.sensitivity === "high" && !modelMatch) scoreShift -= 2;
+  if (brandMatch?.sensitivity === "high" && condition === "unknown") scoreShift -= 1;
+  if (categoryRule?.segment === "major_asset") shouldForceInspection = true;
+
+  const shouldAskFollowup = missing.length > 0;
+  return {
+    score_shift: scoreShift,
+    should_force_inspection: shouldForceInspection,
+    should_ask_followup: shouldAskFollowup,
+    followup_question: shouldAskFollowup
+      ? `Tell the cat: ${missing.slice(0, 3).join(", ")}.`
+      : "The cat has enough product context for now.",
+  };
+}
+
+function analyzePurchase(item, price, currency, options = {}) {
   const rawItem = item.trim();
   const normalizedItem = rawItem.toLowerCase();
-  const hasHermes = /\bherm[eè]s\b/.test(normalizedItem);
-  const hasHerbag = normalizedItem.includes("herbag");
-  const hasBag = normalizedItem.includes("bag") || normalizedItem.includes("purse") || normalizedItem.includes("handbag");
-  const hasUsed = /\b(used|pre[- ]owned|secondhand|vintage)\b/.test(normalizedItem);
-  const hasNew = /\b(new|brand new)\b/.test(normalizedItem);
-  const condition = hasUsed ? "used" : hasNew ? "new" : "unknown";
-
   if (!rawItem) return null;
 
-  if (hasHermes || hasHerbag) {
-    const specificity = hasHerbag
-      ? condition === "unknown"
-        ? "brand_model"
-        : "brand_model_condition"
-      : hasBag
-        ? "brand_category"
-        : "brand_only";
-    const pricePosition = hasHerbag && price >= 2500 && price <= 3800 ? "typical" : price < 2500 ? "possibly_low" : "unknown";
-
-    return {
-      schema_version: AI_SCHEMA_VERSION,
-      normalized_item: normalizedItem,
-      original_item: rawItem,
-      currency,
-      price,
-      item_context: {
-        specificity,
-        category: "luxury_bag",
-        subcategory: hasBag || hasHerbag ? "handbag" : "unknown",
-        brand: "Hermes",
-        model_family: hasHerbag ? "Herbag" : "unknown",
-        model_variant: normalizedItem.includes("zip 31") ? "Zip 31" : "unknown",
-        condition,
-        market_segment: "luxury_resale",
-      },
-      market_context: {
-        reference_frame: hasHerbag ? "model_resale_market" : "brand_category",
-        price_position: pricePosition,
-        confidence: hasHerbag ? 0.66 : 0.48,
-        summary: hasHerbag
-          ? `${money(price, currency)} may be plausible for a Hermes Herbag, but condition, seller, and authentication decide whether it is actually good.`
-          : `${money(price, currency)} may be low for some Hermes bags, but Hermes prices vary heavily by model. The cat needs the exact model before calling it a deal.`,
-      },
-      missing_factors: hasHerbag
-        ? ["condition details", "authentication", "seller reputation", "return policy", "included accessories"]
-        : ["model", "condition", "authentication", "seller reputation", "return policy"],
-      risk: {
-        level: "high",
-        reasons: ["authenticity-sensitive", "condition can change value sharply", "resale prices vary by model"],
-        checks: ["authentication", "clear photos", "date stamp", "seller reputation", "return policy"],
-      },
-      decision_influence: {
-        score_shift: hasHerbag ? 2 : 0,
-        should_force_inspection: false,
-        should_ask_followup: true,
-        followup_question: hasHerbag
-          ? "What condition is it in, and is it authenticated?"
-          : "Which Hermes model is it, and is it new or used?",
-      },
-      cache_key: {
-        category: "luxury_bag",
-        brand: "hermes",
-        model_family: hasHerbag ? "herbag" : "unknown",
-        condition,
-        currency,
-        price_band: priceBand(price),
-      },
-      validity: {
-        region: "US",
-        valid_until_days: 60,
-        needs_refresh: false,
-      },
-      cat_note: hasHerbag
-        ? "The cat recognizes the model, but still wants condition and authenticity proof."
-        : "The cat recognizes Hermes energy, but refuses to judge without the model.",
-      source: "local_mock",
-    };
-  }
+  const brandMatch = detectBrand(normalizedItem);
+  const modelMatch = detectModel(normalizedItem);
+  const categoryRule = detectCategory(normalizedItem, brandMatch);
+  const condition = detectCondition(normalizedItem);
+  const specificity = productSpecificity({
+    category: categoryRule?.category,
+    brand: brandMatch?.brand,
+    model: modelMatch?.model,
+    condition,
+    rawItem,
+  });
+  const referenceFrame = marketReferenceFrame(categoryRule, brandMatch, modelMatch);
+  const position = pricePosition(price, currency, categoryRule, brandMatch, modelMatch);
+  const missing = missingFactors({
+    categoryRule,
+    brandMatch,
+    modelMatch,
+    condition,
+    isReturnable: Boolean(options.isReturnable),
+  });
+  const influence = decisionInfluence({ categoryRule, brandMatch, modelMatch, condition, position, missing });
+  const confidence = Math.min(0.86, (categoryRule ? 0.42 : 0.22) + (brandMatch ? 0.16 : 0) + (modelMatch ? 0.18 : 0));
 
   return {
     schema_version: AI_SCHEMA_VERSION,
@@ -765,49 +999,54 @@ function inferMockAiContext(item, price, currency) {
     currency,
     price,
     item_context: {
-      specificity: hasBag ? "generic_category" : "unclear",
-      category: hasBag ? "bag" : "unknown",
+      specificity,
+      category: categoryRule?.category || "unknown",
       subcategory: "unknown",
-      brand: "unknown",
-      model_family: "unknown",
-      model_variant: "unknown",
-      condition: "unknown",
-      market_segment: "unknown",
+      brand: brandMatch?.brand || "unknown",
+      model_family: modelMatch?.model || "unknown",
+      model_variant: normalizedItem.match(/\b(zip 31|model [3yxs]|pro max|mini|13|14|15|16)\b/)?.[0] || "unknown",
+      condition,
+      market_segment: categoryRule?.segment || "unknown",
     },
     market_context: {
-      reference_frame: hasBag ? "general_category" : "cannot_assess",
-      price_position: "unknown",
-      confidence: hasBag ? 0.42 : 0.28,
-      summary: "The local mock AI does not know enough yet. A real AI check would identify brand, model, market frame, and missing details.",
+      reference_frame: referenceFrame,
+      price_position: position,
+      confidence,
+      summary: analysisSummary({ rawItem, price, currency, categoryRule, brandMatch, modelMatch, condition, position }),
     },
-    missing_factors: ["brand", "model", "condition", "seller", "return policy"],
+    missing_factors: missing,
     risk: {
-      level: hasBag ? "medium" : "unknown",
-      reasons: ["details are incomplete"],
-      checks: ["specific product name", "condition", "return policy"],
+      level: categoryRule?.risk || "unknown",
+      reasons: brandMatch?.sensitivity === "high"
+        ? ["brand-sensitive", "condition can change value sharply", "market prices vary by model"]
+        : categoryRule
+          ? [`${categoryRule.label.toLowerCase()} context detected`]
+          : ["details are incomplete"],
+      checks: categoryRule?.checks || ["specific product name", "condition", "return policy"],
     },
-    decision_influence: {
-      score_shift: 0,
-      should_force_inspection: false,
-      should_ask_followup: true,
-      followup_question: "What brand, model, and condition is it?",
-    },
+    decision_influence: influence,
     cache_key: {
-      category: hasBag ? "bag" : "unknown",
-      brand: "unknown",
-      model_family: "unknown",
-      condition: "unknown",
+      category: categoryRule?.category || "unknown",
+      brand: brandMatch?.brand?.toLowerCase().replaceAll(" ", "_") || "unknown",
+      model_family: modelMatch?.model?.toLowerCase().replaceAll(" ", "_") || "unknown",
+      condition,
       currency,
       price_band: priceBand(price),
     },
     validity: {
       region: "US",
-      valid_until_days: 30,
+      valid_until_days: brandMatch?.sensitivity === "high" ? 60 : 30,
       needs_refresh: false,
     },
-    cat_note: "The cat needs a sharper product name before making market claims.",
-    source: "local_mock",
+    cat_note: influence.should_ask_followup
+      ? influence.followup_question
+      : "The cat has enough local product context for this pass.",
+    source: "local_intelligence_v1",
   };
+}
+
+function inferMockAiContext(item, price, currency, options = {}) {
+  return analyzePurchase(item, price, currency, options);
 }
 
 function renderAiContextCard(aiContext) {
@@ -836,6 +1075,7 @@ async function requestAiContext() {
   const itemName = document.querySelector("#item").value.trim();
   const price = readNumber("price");
   const currency = selectedCurrency();
+  const isReturnable = document.querySelector("#returnable").checked;
 
   if (!itemName) {
     mood.textContent = catMood("unnamedSave");
@@ -857,7 +1097,7 @@ async function requestAiContext() {
       if (!response.ok) throw new Error("AI context request failed");
       aiContext = await response.json();
     } else {
-      aiContext = inferMockAiContext(itemName, price, currency);
+      aiContext = inferMockAiContext(itemName, price, currency, { isReturnable });
     }
 
     renderAiContextCard(aiContext);
@@ -1272,6 +1512,18 @@ function rememberDecision() {
     currency: currentDecision.currency,
     score: currentDecision.score,
     verdict: currentDecision.verdict,
+    analysis: currentDecision.purchaseAnalysis
+      ? {
+          schemaVersion: currentDecision.purchaseAnalysis.schema_version,
+          category: currentDecision.purchaseAnalysis.item_context.category,
+          brand: currentDecision.purchaseAnalysis.item_context.brand,
+          modelFamily: currentDecision.purchaseAnalysis.item_context.model_family,
+          specificity: currentDecision.purchaseAnalysis.item_context.specificity,
+          referenceFrame: currentDecision.purchaseAnalysis.market_context.reference_frame,
+          priceBand: currentDecision.purchaseAnalysis.cache_key.price_band,
+          risk: currentDecision.purchaseAnalysis.risk.level,
+        }
+      : null,
     feedback: [],
     createdAt: new Date().toISOString(),
   };
@@ -1327,19 +1579,22 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   const impulsePenalty = impulseValue * 7;
   const duplicatePenalty = duplicate * 15;
   const priceContext = productPriceContext(item, price, currency);
+  const purchaseAnalysis = analyzePurchase(itemName, price, currency, { isReturnable });
   const usageNote = usageRealityNote(uses, useFrequency);
   const dealBonus = dealScoreBonus(isDealPrice, priceContext);
   const returnableShift = returnableScoreShift(isReturnable, impulseValue, priceContext);
+  const needsInspection = priceContext.needsInspection || purchaseAnalysis?.decision_influence.should_force_inspection;
   const score =
     68 +
     useScore +
     priceContext.scoreShift +
+    (purchaseAnalysis?.decision_influence.score_shift || 0) +
     dealBonus +
     returnableShift -
     budgetPenalty -
     impulsePenalty -
     duplicatePenalty;
-  const normalizedScore = Math.max(0, Math.min(100, score));
+  const normalizedScore = needsInspection ? Math.max(0, Math.min(69, score)) : Math.max(0, Math.min(100, score));
   const perUse = expectedUses > 0 ? price / expectedUses : price;
 
   currentDecision = {
@@ -1353,6 +1608,7 @@ function calculateDecision({ remember = true, sound = true } = {}) {
     currency,
     isDealPrice,
     isReturnable,
+    purchaseAnalysis,
     feedback: [],
     id: null,
     hasNamedItem: Boolean(itemName),
@@ -1366,7 +1622,7 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   let result;
   let message;
 
-  if (priceContext.needsInspection) {
+  if (needsInspection) {
     result = "Needs serious inspection";
     message = decisionReason("inspection", { item, price, currency });
   } else if (normalizedScore >= 72) {
@@ -1389,6 +1645,8 @@ function calculateDecision({ remember = true, sound = true } = {}) {
     message += priceContext.message;
   }
 
+  message += intelligenceNote(purchaseAnalysis);
+
   if (isDealPrice) {
     message += ` ${dealNote(priceContext)}`;
   }
@@ -1404,13 +1662,13 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   verdict.textContent = result;
   reason.textContent = message;
   currentDecision.verdict = result;
-  mood.textContent = normalizedScore >= 72 && !priceContext.needsInspection ? catMood("approved") : catMood("judged");
-  rebelButton.hidden = normalizedScore >= 72 && !priceContext.needsInspection;
-  listenButton.hidden = normalizedScore >= 72 && !priceContext.needsInspection;
-  negotiation.hidden = normalizedScore >= 72 && !priceContext.needsInspection;
+  mood.textContent = normalizedScore >= 72 && !needsInspection ? catMood("approved") : catMood("judged");
+  rebelButton.hidden = normalizedScore >= 72 && !needsInspection;
+  listenButton.hidden = normalizedScore >= 72 && !needsInspection;
+  negotiation.hidden = normalizedScore >= 72 && !needsInspection;
   if (remember) rememberDecision();
   if (sound) {
-    playPurr({ mood: normalizedScore >= 72 ? "soft" : "grumpy" });
+    playPurr({ mood: normalizedScore >= 72 && !needsInspection ? "soft" : "grumpy" });
     scheduleAmbientPurr();
   }
   bounceCat();
