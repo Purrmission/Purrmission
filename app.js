@@ -428,11 +428,12 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   const duplicate = Number(document.querySelector("#duplicate").value);
   const impulseValue = Number(impulse.value);
 
-  const budgetRatio = budget > 0 ? price / budget : 1.4;
+  const hasBudget = budget > 0;
+  const budgetRatio = hasBudget ? price / budget : 0;
   const monthlyUses = usesPerMonth(uses, useFrequency);
   const expectedUses = totalExpectedUses(uses, useFrequency, useMonths);
   const useScore = Math.min(30, monthlyUses * 3);
-  const budgetPenalty = Math.min(42, budgetRatio * 48);
+  const budgetPenalty = hasBudget ? Math.min(42, budgetRatio * 48) : 0;
   const impulsePenalty = impulseValue * 7;
   const duplicatePenalty = duplicate * 15;
   const score = Math.round(68 + useScore - budgetPenalty - impulsePenalty - duplicatePenalty);
@@ -452,7 +453,7 @@ function calculateDecision({ remember = true, sound = true } = {}) {
     hasNamedItem: Boolean(itemName),
   };
 
-  budgetBite.textContent = budget > 0 ? `${Math.round(budgetRatio * 100)}%` : "No budget";
+  budgetBite.textContent = hasBudget ? `${Math.round(budgetRatio * 100)}%` : "Not set";
   costUse.textContent = `${money(perUse)} / use`;
   catScore.textContent = normalizedScore;
 
@@ -488,7 +489,7 @@ function calculateDecision({ remember = true, sound = true } = {}) {
   }
   bounceCat();
 
-  if (budgetRatio > 1) {
+  if (hasBudget && budgetRatio > 1) {
     mood.textContent = "budget breach detected";
     window.setTimeout(angryScratch, 180);
   }
@@ -513,15 +514,16 @@ function calculateNegotiation(event) {
     0,
     Math.min(100, currentDecision.score + waitBonus + priceBonus + useBonus + tradeoff),
   );
-  const adjustedBudgetRatio = currentDecision.budget > 0 ? targetPrice / currentDecision.budget : 1.4;
+  const hasBudget = currentDecision.budget > 0;
+  const adjustedBudgetRatio = hasBudget ? targetPrice / currentDecision.budget : 0;
   const adjustedPerUse = promisedUses > 0 ? targetPrice / promisedUses : targetPrice;
   const promisedUsage = usageLabel(promisedUses, usePeriod);
 
-  budgetBite.textContent = currentDecision.budget > 0 ? `${Math.round(adjustedBudgetRatio * 100)}%` : "No budget";
+  budgetBite.textContent = hasBudget ? `${Math.round(adjustedBudgetRatio * 100)}%` : "Not set";
   costUse.textContent = `${money(adjustedPerUse)} / use`;
   catScore.textContent = adjustedScore;
 
-  if (adjustedScore >= 72 && adjustedBudgetRatio <= 1) {
+  if (adjustedScore >= 72 && (!hasBudget || adjustedBudgetRatio <= 1)) {
     verdict.textContent = "Conditional purrmission";
     reason.textContent = `${currentDecision.item} is allowed if you wait ${waitDays} day${waitDays === 1 ? "" : "s"}, pay no more than ${money(targetPrice)}, and use it ${promisedUsage}. The cat has made a legally fuzzy exception.`;
     currentDecision.verdict = "Conditional purrmission";
@@ -545,7 +547,7 @@ function calculateNegotiation(event) {
   calculator.classList.add("skeptical");
   if (currentDecision.hasNamedItem) rememberDecision();
 
-  if (adjustedBudgetRatio > 1) {
+  if (hasBudget && adjustedBudgetRatio > 1) {
     playPurr({ mood: "grumpy" });
     window.setTimeout(angryScratch, 180);
   }
