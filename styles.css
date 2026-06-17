@@ -495,6 +495,8 @@ body {
 
 .cat-room-stage {
   position: relative;
+  --pet-x: 3rem;
+  --pet-y: 13rem;
   min-height: 18rem;
   margin-top: 0.85rem;
   overflow: hidden;
@@ -518,23 +520,53 @@ body {
 
 .room-cat {
   position: absolute;
-  right: 1.2rem;
-  bottom: -2rem;
+  left: calc(var(--pet-x) - 3.8rem);
+  top: calc(var(--pet-y) - 5.8rem);
   width: 9.4rem;
   height: 9rem;
-  transform: translateY(3.6rem) rotate(-4deg);
+  transform: translate(11rem, 4.8rem) rotate(-4deg);
   transition:
+    left 220ms ease,
+    top 220ms ease,
     transform 360ms cubic-bezier(0.2, 0.9, 0.2, 1.1),
     filter 240ms ease;
 }
 
 .cat-room-stage.is-curious .room-cat,
 .cat-room-stage.is-petting .room-cat {
-  transform: translateY(0.4rem) rotate(-2deg);
+  transform: translate(0.8rem, 0.5rem) rotate(-2deg);
 }
 
-.cat-room-stage.is-petting .room-cat {
+.cat-room-stage.is-petting.boop-head .room-cat,
+.cat-room-stage.is-petting.rub-body .room-cat {
   animation: cat-rub 760ms ease-in-out infinite;
+}
+
+.cat-room-stage.is-petting.tail-brush .room-cat {
+  transform: translate(1.5rem, 1rem) rotate(-10deg);
+}
+
+.cat-room-stage.peek-left .room-cat {
+  --peek-rotate: 6deg;
+  left: -3rem;
+  top: 4.6rem;
+  transform: translate(0, 0) rotate(6deg);
+  animation: peek-pop 1400ms ease both;
+}
+
+.cat-room-stage.peek-right .room-cat {
+  --peek-rotate: -8deg;
+  left: calc(100% - 6rem);
+  top: 3.8rem;
+  transform: translate(0, 0) rotate(-8deg);
+  animation: peek-pop 1400ms ease both;
+}
+
+.cat-room-stage.peek-top .room-cat {
+  left: 50%;
+  top: -2.2rem;
+  transform: translateX(-50%) rotate(2deg);
+  animation: peek-drop 1400ms ease both;
 }
 
 .room-body,
@@ -568,7 +600,10 @@ body {
   transform: rotate(-14deg);
 }
 
-.cat-room-stage.is-petting .room-tail {
+.cat-room-stage.is-petting .room-tail,
+.cat-room-stage.peek-left .room-tail,
+.cat-room-stage.peek-right .room-tail,
+.cat-room-stage.peek-top .room-tail {
   animation: tail-swish 560ms ease-in-out infinite;
 }
 
@@ -625,6 +660,16 @@ body {
 .cat-room-stage.is-petting .room-eye {
   height: 0.14rem;
   margin-top: 0.18rem;
+}
+
+.cat-room-stage.is-petting.tail-brush .room-eye {
+  height: 0.58rem;
+  margin-top: 0;
+}
+
+.cat-room-stage.is-petting.tail-brush .room-tail {
+  width: 5.2rem;
+  transform: rotate(9deg);
 }
 
 .room-nose {
@@ -2369,6 +2414,32 @@ input[type="range"] {
   }
   50% {
     transform: rotate(-2deg);
+  }
+}
+
+@keyframes peek-pop {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(2.4rem) scale(0.92) rotate(var(--peek-rotate, 0deg));
+  }
+  22%,
+  74% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(var(--peek-rotate, 0deg));
+  }
+}
+
+@keyframes peek-drop {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-2.4rem) scale(0.92) rotate(2deg);
+  }
+  22%,
+  74% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1) rotate(2deg);
   }
 }
 

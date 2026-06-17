@@ -1559,6 +1559,80 @@ function renderCatRoom(state = loadCareState()) {
   catRoomStage.classList.toggle("is-curious", careTone(state) !== "sharp");
 }
 
+function setPetTargetFromEvent(event) {
+  const stageRect = catRoomStage.getBoundingClientRect();
+  const fallbackX = stageRect.width * 0.28;
+  const fallbackY = stageRect.height * 0.72;
+  const pointerX = Number.isFinite(event?.clientX) ? event.clientX - stageRect.left : fallbackX;
+  const pointerY = Number.isFinite(event?.clientY) ? event.clientY - stageRect.top : fallbackY;
+  const safeX = Math.max(54, Math.min(stageRect.width - 54, pointerX));
+  const safeY = Math.max(58, Math.min(stageRect.height - 44, pointerY));
+  catRoomStage.style.setProperty("--pet-x", `${safeX}px`);
+  catRoomStage.style.setProperty("--pet-y", `${safeY}px`);
+}
+
+function clearPetPoseClasses() {
+  catRoomStage.classList.remove("boop-head", "rub-body", "tail-brush");
+}
+
+function choosePetPose() {
+  clearPetPoseClasses();
+  const poses = ["boop-head", "rub-body", "tail-brush"];
+  const pose = poses[Math.floor(Math.random() * poses.length)];
+  catRoomStage.classList.add(pose);
+  return pose;
+}
+
+function petPoseLine(pose, tone) {
+  if (pose === "tail-brush") {
+    return tone === "sharp"
+      ? "The cat allows one tail brush. This is not full forgiveness."
+      : "The cat flicks its tail into your hand like a tiny velvet receipt.";
+  }
+  if (pose === "rub-body") {
+    return tone === "sharp"
+      ? "The cat leans in with professional caution."
+      : "The cat presses its side into your hand and purrs like a small engine.";
+  }
+  return tone === "sharp"
+    ? "The cat gives you one careful head bump. Spend wisely."
+    : "The cat pops its head out for a perfect little forehead rub.";
+}
+
+let peekTimer;
+
+function clearPeekClasses() {
+  catRoomStage.classList.remove("peek-left", "peek-right", "peek-top");
+}
+
+function playfulPeek() {
+  if (!document.getElementById("cat-room-view").classList.contains("is-active")) return;
+  if (catRoomStage.classList.contains("is-petting")) return;
+  clearPeekClasses();
+  const peeks = ["peek-left", "peek-right", "peek-top"];
+  const nextPeek = peeks[Math.floor(Math.random() * peeks.length)];
+  catRoomStage.classList.add(nextPeek);
+  roomCatLine.textContent = randomLine("room-peek", [
+    "The cat briefly pops out to inspect your financial aura.",
+    "A suspicious little face appears, then pretends it did not.",
+    "The cat peeks in. The cart has been warned.",
+    "Tiny head. Large opinions.",
+  ]);
+  window.setTimeout(() => {
+    clearPeekClasses();
+    renderCatRoom();
+  }, 1450);
+}
+
+function schedulePlayfulPeek() {
+  window.clearTimeout(peekTimer);
+  if (!document.getElementById("cat-room-view").classList.contains("is-active")) return;
+  peekTimer = window.setTimeout(() => {
+    playfulPeek();
+    schedulePlayfulPeek();
+  }, 3500 + Math.random() * 4500);
+}
+
 function switchView(targetId) {
   appViews.forEach((view) => {
     view.classList.toggle("is-active", view.id === targetId);
@@ -1568,24 +1642,33 @@ function switchView(targetId) {
     tab.classList.toggle("is-active", isActive);
     tab.setAttribute("aria-pressed", String(isActive));
   });
-  if (targetId === "cat-room-view") renderCatRoom();
+  window.clearTimeout(peekTimer);
+  if (targetId === "cat-room-view") {
+    renderCatRoom();
+    window.setTimeout(playfulPeek, 500);
+    schedulePlayfulPeek();
+  } else {
+    clearPeekClasses();
+  }
 }
 
 let lastPetRewardAt = 0;
 let lastPetPointerAt = 0;
 
-function startPetting() {
+function startPetting(event) {
   const state = loadCareState();
+  const tone = careTone(state);
+  setPetTargetFromEvent(event);
+  clearPeekClasses();
+  const pose = choosePetPose();
   catRoomStage.classList.add("is-petting", "is-curious");
-  roomCatLine.textContent =
-    careTone(state) === "sharp"
-      ? "The cat accepts the gesture, stiffly. Better financial behavior will help more."
-      : "The cat leans in and does a tiny satisfied cheek rub.";
+  roomCatLine.textContent = petPoseLine(pose, tone);
   playPurr({ immediate: true, mood: careTone(state) === "sharp" ? "soft" : "happy" });
 }
 
 function stopPetting() {
   catRoomStage.classList.remove("is-petting");
+  clearPetPoseClasses();
   const now = Date.now();
   if (now - lastPetRewardAt > 12000) {
     lastPetRewardAt = now;
@@ -2089,7 +2172,7 @@ petZone.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   lastPetPointerAt = Date.now();
   petZone.setPointerCapture?.(event.pointerId);
-  startPetting();
+  startPetting(event);
 });
 
 petZone.addEventListener("pointerup", (event) => {
@@ -2101,9 +2184,9 @@ petZone.addEventListener("pointercancel", stopPetting);
 petZone.addEventListener("pointerleave", () => {
   if (catRoomStage.classList.contains("is-petting")) stopPetting();
 });
-petZone.addEventListener("click", () => {
+petZone.addEventListener("click", (event) => {
   if (Date.now() - lastPetPointerAt < 350) return;
-  startPetting();
+  startPetting(event);
   window.setTimeout(stopPetting, 280);
 });
 
